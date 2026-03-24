@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strawberry Cold Chain · Digital Twin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg:#07101f;
+  --surface:#0e1a2e;
+  --card:#111f35;
+  --border:rgba(255,255,255,0.07);
+  --green:#34d058;
+  --amber:#f5a623;
+  --coral:#ff6b6b;
+  --blue:#5ba4f5;
+  --purple:#9b80f0;
+  --teal:#2dd4bf;
+  --text:#e8f0fe;
+  --muted:#7a93b8;
+  --dim:#3a5070;
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:24px 16px 36px;
+  gap:16px;
+}
+
+/* ── HEADER ── */
+.header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  text-align:center;
+}
+.eyebrow{
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:.2em;
+  color:var(--teal);
+  text-transform:uppercase;
+}
+h1{
+  font-family:'Playfair Display',serif;
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:-.01em;
+  line-height:1.1;
+}
+h1 em{font-style:italic;color:var(--green);}
+.subline{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:300;
+  letter-spacing:.03em;
+}
+
+/* ── MAIN LAYOUT ── */
+.main{
+  width:100%;
+  max-width:1200px;
+  display:grid;
+  grid-template-columns:1fr 230px;
+  gap:14px;
+  align-items:start;
+}
+
+/* ── MAP CARD ── */
+.map-card{
+  background:var(--surface);
+  border-radius:16px;
+  border:1px solid var(--border);
+  overflow:hidden;
+  box-shadow:0 0 60px rgba(52,208,88,0.05), 0 0 0 1px rgba(255,255,255,0.03);
+  position:relative;
+}
+.map-card svg{display:block;width:100%;}
+
+/* ── LEGEND (inside map, bottom-left) ── */
+.legend-row{
+  position:absolute;
+  bottom:14px;
+  left:16px;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.leg{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.leg-line{width:20px;height:2px;flex-shrink:0;border-radius:1px;}
+
+/* ── RIGHT PANEL ── */
+.right-panel{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* ── SIM RESULTS CARD ── */
+.sim-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.sim-card-title{
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--teal);
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+.metric-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  padding:4px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.metric-row:last-child{border-bottom:none;}
+.metric-label{font-size:10px;color:var(--muted);font-weight:300;}
+.metric-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.green{color:var(--green);}
+.amber{color:var(--amber);}
+.coral{color:var(--coral);}
+.blue{color:var(--blue);}
+.dim-val{color:var(--dim);}
+
+/* ── DECISION FEED CARD ── */
+.decision-card{
+  background:var(--card);
+  border:1px solid rgba(155,128,240,0.25);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.decision-card .sim-card-title{color:var(--purple);}
+.decision-row{
+  margin-top:8px;
+  padding:8px 10px;
+  background:rgba(155,128,240,0.07);
+  border-radius:8px;
+  border:1px solid rgba(155,128,240,0.15);
+}
+.decision-row .d-label{font-size:9px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.07em;}
+.decision-row .d-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text);}
+.approved{color:var(--green);font-weight:500;}
+
+/* ── BAR CHART CARD ── */
+.chart-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.chart-card .sim-card-title{color:var(--amber);}
+.bars{
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  height:80px;
+  margin-top:8px;
+}
+.bar-col{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  height:100%;
+  justify-content:flex-end;
+}
+.bar{
+  width:100%;
+  border-radius:4px 4px 0 0;
+  min-height:4px;
+  transition:height .3s ease;
+}
+.bar-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.bar-lbl{font-size:8.5px;color:var(--muted);text-align:center;line-height:1.2;}
+
+/* ── PROFIT HERO ── */
+.profit-hero{
+  background:linear-gradient(135deg, rgba(52,208,88,0.1) 0%, rgba(45,212,191,0.06) 100%);
+  border:1px solid rgba(52,208,88,0.2);
+  border-radius:12px;
+  padding:14px 16px;
+  text-align:center;
+}
+.profit-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;}
+.profit-val{font-family:'Playfair Display',serif;font-size:26px;color:var(--green);line-height:1;}
+.profit-sub{font-size:9px;color:var(--muted);margin-top:4px;}
+.cost-row{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid rgba(52,208,88,0.12);}
+.cost-item{text-align:center;}
+.cost-item .cv{font-family:'DM Mono',monospace;font-size:11px;}
+.cost-item .cl{font-size:8px;color:var(--muted);}
+
+/* ROUTE ANIMATIONS */
+@keyframes dashflow{to{stroke-dashoffset:-30;}}
+@keyframes pulse{0%,100%{r:7;opacity:1;}50%{r:9;opacity:.6;}}
+@keyframes fadein{from{opacity:0;}to{opacity:1;}}
+.route-anim{animation:dashflow 2.8s linear infinite;}
+.route-anim-slow{animation:dashflow 4s linear infinite;}
+.node-pulse{animation:pulse 2.4s ease-in-out infinite;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">Digital Twin Framework · AnyLogic PLE Simulation · N = 370 runs</div>
+  <h1>Strawberry Cold Chain — <em>Salinas to New York</em></h1>
+  <p class="subline">Driscoll's Farm · C.H. Robinson Logistics · Fulton DC Hub · Three-Tier NYC Distribution · 2,900 miles</p>
+</div>
+
+<div class="main">
+
+  <!-- ══════════════ MAP ══════════════ -->
+  <div class="map-card">
+  <svg viewBox="0 0 900 570" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- very subtle land texture -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#132240"/>
+      <stop offset="100%" stop-color="#0a1428"/>
+    </radialGradient>
+
+    <!-- route glow -->
+    <filter id="routeGlow" x="-20%" y="-200%" width="140%" height="500%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="nodeGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- arrows -->
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#34d058" stroke-width="1.5" stroke-linecap="round"/>
+    </marker>
+    <marker id="aa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/>
+    </marker>
+    <marker id="ac" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#ff6b6b" stroke-width="1.5" stroke-linecap="round"/>
+    </marker>
+    <marker id="ab" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#5ba4f5" stroke-width="1.5" stroke-linecap="round"/>
+    </marker>
+  </defs>
+
+  <!-- ══ BACKGROUND ══ -->
+  <rect width="900" height="570" fill="url(#bgGrad)"/>
+
+  <!-- ══ US LAND MASS ══ -->
+  <!-- Ocean tint outside -->
+  <rect width="900" height="570" fill="#081424"/>
+
+  <!-- Main continental US -->
+  <path d="
+    M 62 170 L 72 162 L 88 156 L 108 150 L 128 144 L 146 139
+    L 156 128 L 159 118 L 163 112 L 169 107 L 176 102
+    L 188 96 L 202 92 L 218 89
+    L 224 82 L 229 75 L 234 70 L 241 67
+    L 250 63 L 265 60 L 280 57 L 298 55
+    L 316 53 L 334 51 L 352 50 L 370 49
+    L 388 48 L 406 48 L 424 48 L 442 49
+    L 459 50 L 476 52 L 492 54 L 507 56
+    L 520 54 L 533 50 L 546 47 L 558 44
+    L 570 42 L 582 41 L 593 41 L 604 42
+    L 615 44 L 625 47 L 634 51 L 642 56
+    L 649 62 L 655 69 L 659 77 L 661 86
+    L 661 96 L 660 106 L 658 116 L 655 126
+    L 652 136 L 649 146 L 646 156 L 644 166
+    L 644 176 L 645 186 L 647 196 L 650 206
+    L 653 216 L 657 226 L 661 236 L 664 246
+    L 667 256 L 669 266 L 670 276 L 669 286
+    L 666 295 L 661 303 L 654 310 L 646 316
+    L 638 321 L 630 325 L 622 328 L 614 330
+    L 606 331 L 598 330 L 590 327 L 582 323
+    L 574 318 L 566 312 L 558 306 L 550 301
+    L 542 297 L 534 294 L 526 292 L 518 292
+    L 510 293 L 502 296 L 494 300 L 486 305
+    L 478 311 L 470 317 L 462 323 L 454 329
+    L 446 335 L 438 340 L 430 344 L 422 348
+    L 412 352 L 398 356 L 382 360 L 364 363
+    L 346 366 L 328 368 L 310 369 L 293 369
+    L 277 368 L 263 366 L 250 362 L 239 357
+    L 230 351 L 224 344 L 220 336
+    L 214 331 L 206 328 L 198 327
+    L 190 328 L 182 330 L 174 333 L 166 337
+    L 158 341 L 150 344 L 140 346 L 128 347
+    L 116 346 L 105 343 L 96 339 L 88 334
+    L 82 327 L 78 319 L 76 310 L 77 301
+    L 79 292 L 82 282 L 84 272 L 85 262
+    L 85 252 L 84 242 L 82 232 L 80 222
+    L 79 212 L 79 202 L 80 192 L 82 182 Z
+  " fill="#111f35" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+  <!-- Florida -->
+  <path d="M 600 348 L 610 355 L 616 365 L 618 378 L 616 390 L 610 400 L 601 405 L 592 403 L 586 397 L 583 388 L 584 377 L 588 366 L 594 357 Z" fill="#111f35" stroke="rgba(255,255,255,0.08)" stroke-width="0.8"/>
+
+  <!-- Great Lakes -->
+  <ellipse cx="548" cy="138" rx="34" ry="14" fill="#081424" stroke="rgba(91,164,245,0.15)" stroke-width="0.8"/>
+  <ellipse cx="582" cy="126" rx="16" ry="8" fill="#081424" stroke="rgba(91,164,245,0.15)" stroke-width="0.8"/>
+  <ellipse cx="515" cy="128" rx="14" ry="7" fill="#081424" stroke="rgba(91,164,245,0.15)" stroke-width="0.8"/>
+
+  <!-- Very faint state abbreviations for context -->
+  <text x="128" y="215" font-size="8" fill="rgba(255,255,255,0.14)" text-anchor="middle" font-family="DM Sans,sans-serif" font-weight="500">CA</text>
+  <text x="195" y="225" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">NV</text>
+  <text x="245" y="195" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">UT</text>
+  <text x="280" y="170" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">CO</text>
+  <text x="330" y="172" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">KS</text>
+  <text x="388" y="178" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">MO</text>
+  <text x="442" y="178" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">IN</text>
+  <text x="490" y="178" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">OH</text>
+  <text x="538" y="175" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">PA</text>
+  <text x="585" y="162" font-size="8" fill="rgba(255,255,255,0.1)" text-anchor="middle" font-family="DM Sans,sans-serif">NY</text>
+  <text x="382" y="270" font-size="7" fill="rgba(255,255,255,0.08)" text-anchor="middle" font-family="DM Sans,sans-serif">TX</text>
+  <text x="438" y="260" font-size="7" fill="rgba(255,255,255,0.08)" text-anchor="middle" font-family="DM Sans,sans-serif">TN</text>
+
+  <!-- ══ ROUTE PATHS ══ -->
+
+  <!-- LEG 1 GLOW: Salinas → Fulton DC -->
+  <!-- Salinas ≈ (118, 218), Fulton DC ≈ (618, 162) -->
+  <path d="M 118 218 C 175 202, 255 188, 330 182 C 405 176, 480 170, 560 165 C 585 163, 602 162, 618 162"
+    fill="none" stroke="rgba(52,208,88,0.15)" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- LEG 1 MAIN animated dashes -->
+  <path id="leg1" d="M 118 218 C 175 202, 255 188, 330 182 C 405 176, 480 170, 560 165 C 585 163, 602 162, 618 162"
+    fill="none" stroke="#34d058" stroke-width="2.2"
+    stroke-dasharray="12 6" class="route-anim"
+    stroke-linecap="round" marker-end="url(#ag)"
+    filter="url(#routeGlow)"/>
+
+  <!-- Route label on path -->
+  <text font-size="9" fill="rgba(52,208,88,0.6)" font-family="DM Sans,sans-serif" font-weight="500">
+    <textPath href="#leg1" startOffset="28%">I-80 · 2,900 mi · 120 hrs · 4 °C target · PEGS sensor active</textPath>
+  </text>
+
+  <!-- LEG 2 LAST-MILE from Fulton DC to 3 NYC destinations -->
+  <!-- Whole Foods Manhattan ≈ (638, 196) -->
+  <path d="M 618 168 C 624 178, 630 186, 638 196"
+    fill="none" stroke="#34d058" stroke-width="1.8"
+    stroke-dasharray="6 4" class="route-anim-slow"
+    stroke-linecap="round" marker-end="url(#ag)"/>
+
+  <!-- Discount Queens ≈ (650, 208) -->
+  <path d="M 620 172 C 632 186, 640 196, 650 208"
+    fill="none" stroke="#f5a623" stroke-width="1.8"
+    stroke-dasharray="6 4" class="route-anim-slow"
+    stroke-linecap="round" marker-end="url(#aa)"/>
+
+  <!-- City Harvest Bronx ≈ (628, 214) -->
+  <path d="M 615 170 C 618 188, 620 200, 628 214"
+    fill="none" stroke="#ff6b6b" stroke-width="1.8"
+    stroke-dasharray="6 4" class="route-anim-slow"
+    stroke-linecap="round" marker-end="url(#ac)"/>
+
+  <!-- ══ DISRUPTION ZONE (Ohio area) ══ -->
+  <ellipse cx="490" cy="178" rx="42" ry="22"
+    fill="rgba(255,107,107,0.05)"
+    stroke="rgba(255,107,107,0.22)" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="490" y="157" text-anchor="middle" font-size="8.5" fill="rgba(255,107,107,0.75)"
+    font-family="DM Sans,sans-serif" font-weight="500">⚠ Cold chain risk zone</text>
+  <text x="490" y="167" text-anchor="middle" font-size="7.5" fill="rgba(255,107,107,0.5)"
+    font-family="DM Sans,sans-serif">30% shipments flagged</text>
+
+  <!-- ══ NODE: SALINAS FARM ══ -->
+  <g filter="url(#nodeGlow)">
+    <circle cx="118" cy="218" r="13" fill="rgba(52,208,88,0.12)"/>
+    <circle cx="118" cy="218" r="7" fill="#34d058" class="node-pulse" opacity="0.9"/>
+    <circle cx="118" cy="218" r="3" fill="white"/>
+  </g>
+  <!-- Farm label -->
+  <rect x="62" y="228" width="116" height="44" rx="7"
+    fill="rgba(7,16,31,0.88)" stroke="rgba(52,208,88,0.3)" stroke-width="0.8"/>
+  <text x="120" y="243" text-anchor="middle" font-size="10" fill="#34d058"
+    font-family="DM Sans,sans-serif" font-weight="600">Driscoll's Farm</text>
+  <text x="120" y="255" text-anchor="middle" font-size="8.5" fill="#7a93b8"
+    font-family="DM Sans,sans-serif">Salinas, CA</text>
+  <text x="120" y="265" text-anchor="middle" font-size="8" fill="rgba(52,208,88,0.7)"
+    font-family="DM Mono,monospace">RSL₀ = 14 days</text>
+
+  <!-- ══ CHECKPOINT DOTS (clean, no cards) ══ -->
+  <!-- Nevada border -->
+  <circle cx="192" cy="210" r="4" fill="rgba(91,164,245,0.3)" stroke="#5ba4f5" stroke-width="1.2"/>
+  <circle cx="192" cy="210" r="1.8" fill="#5ba4f5"/>
+  <text x="192" y="222" text-anchor="middle" font-size="7.5" fill="rgba(91,164,245,0.6)"
+    font-family="DM Sans,sans-serif">NV border</text>
+
+  <!-- Salt Lake City -->
+  <circle cx="252" cy="196" r="4" fill="rgba(91,164,245,0.3)" stroke="#5ba4f5" stroke-width="1.2"/>
+  <circle cx="252" cy="196" r="1.8" fill="#5ba4f5"/>
+  <text x="252" y="208" text-anchor="middle" font-size="7.5" fill="rgba(91,164,245,0.6)"
+    font-family="DM Sans,sans-serif">Salt Lake</text>
+
+  <!-- Kansas City -->
+  <circle cx="360" cy="184" r="4" fill="rgba(91,164,245,0.3)" stroke="#5ba4f5" stroke-width="1.2"/>
+  <circle cx="360" cy="184" r="1.8" fill="#5ba4f5"/>
+  <text x="360" y="196" text-anchor="middle" font-size="7.5" fill="rgba(91,164,245,0.6)"
+    font-family="DM Sans,sans-serif">Kansas City</text>
+
+  <!-- ══ NODE: FULTON DC HUB ══ -->
+  <g filter="url(#nodeGlow)">
+    <circle cx="618" cy="162" r="17" fill="rgba(91,164,245,0.15)" stroke="#5ba4f5" stroke-width="1.2"/>
+    <circle cx="618" cy="162" r="8" fill="#5ba4f5" opacity="0.9"/>
+    <circle cx="618" cy="162" r="3.5" fill="white"/>
+  </g>
+  <!-- DC label — above, left-anchored -->
+  <rect x="490" y="72" width="154" height="70" rx="8"
+    fill="rgba(7,16,31,0.92)" stroke="rgba(91,164,245,0.35)" stroke-width="1"/>
+  <text x="502" y="90" font-size="10.5" fill="#5ba4f5"
+    font-family="DM Sans,sans-serif" font-weight="600">Fulton DC Hub</text>
+  <text x="502" y="103" font-size="8.5" fill="#7a93b8"
+    font-family="DM Sans,sans-serif">Fulton, NY · ~30 mi from NYC</text>
+  <text x="502" y="115" font-size="8.5" fill="#7a93b8"
+    font-family="DM Sans,sans-serif">DT NRV sort executed</text>
+  <text x="502" y="127" font-size="8.5" fill="#7a93b8"
+    font-family="DM Sans,sans-serif">FEFO → 3-tier dispatch</text>
+  <text x="502" y="134" font-size="7.5" fill="rgba(91,164,245,0.5)"
+    font-family="DM Mono,monospace">DC_Processing_Hub node</text>
+  <!-- leader line -->
+  <line x1="618" y1="145" x2="618" y2="142" stroke="rgba(91,164,245,0.4)" stroke-width="0.8" stroke-dasharray="3 2"/>
+  <line x1="602" y1="122" x2="618" y2="144" stroke="rgba(91,164,245,0.3)" stroke-width="0.8" stroke-dasharray="3 2"/>
+
+  <!-- ══ NYC DESTINATION NODES ══ -->
+  <!-- Whole Foods Manhattan -->
+  <circle cx="638" cy="196" r="6" fill="rgba(52,208,88,0.3)" stroke="#34d058" stroke-width="1.5"/>
+  <circle cx="638" cy="196" r="2.5" fill="#34d058"/>
+  <rect x="646" y="187" width="130" height="30" rx="6"
+    fill="rgba(7,16,31,0.88)" stroke="rgba(52,208,88,0.25)" stroke-width="0.8"/>
+  <text x="652" y="199" font-size="9.5" fill="#34d058"
+    font-family="DM Sans,sans-serif" font-weight="600">Whole Foods · Manhattan</text>
+  <text x="652" y="211" font-size="8.5" fill="#7a93b8"
+    font-family="DM Sans,sans-serif">66 pallets · RSL &gt; 4d · 100%</text>
+
+  <!-- Discount Store Queens -->
+  <circle cx="650" cy="208" r="6" fill="rgba(245,166,35,0.3)" stroke="#f5a623" stroke-width="1.5"/>
+  <circle cx="650" cy="208" r="2.5" fill="#f5a623"/>
+  <rect x="658" y="200" width="128" height="30" rx="6"
+    fill="rgba(7,16,31,0.88)" stroke="rgba(245,166,35,0.25)" stroke-width="0.8"/>
+  <text x="664" y="212" font-size="9.5" fill="#f5a623"
+    font-family="DM Sans,sans-serif" font-weight="600">Discount Store · Queens</text>
+  <text x="664" y="224" font-size="8.5" fill="#7a93b8"
+    font-family="DM Sans,sans-serif">168 pallets · RSL 2–4d · 50%</text>
+
+  <!-- City Harvest Bronx -->
+  <circle cx="628" cy="214" r="6" fill="rgba(255,107,107,0.3)" stroke="#ff6b6b" stroke-width="1.5"/>
+  <circle cx="628" cy="214" r="2.5" fill="#ff6b6b"/>
+  <rect x="638" y="218" width="118" height="30" rx="6"
+    fill="rgba(7,16,31,0.88)" stroke="rgba(255,107,107,0.25)" stroke-width="0.8"/>
+  <text x="644" y="230" font-size="9.5" fill="#ff6b6b"
+    font-family="DM Sans,sans-serif" font-weight="600">City Harvest · Bronx</text>
+  <text x="644" y="242" font-size="8.5" fill="#7a93b8"
+    font-family="DM Sans,sans-serif">98 pallets · RSL &lt; 2d · donate</text>
+
+  <!-- ══ LEGEND (bottom left) ══ -->
+  <rect x="16" y="436" width="260" height="114" rx="8"
+    fill="rgba(7,16,31,0.75)" stroke="rgba(255,255,255,0.06)" stroke-width="0.8"/>
+
+  <text x="28" y="454" font-size="8.5" fill="rgba(255,255,255,0.3)"
+    font-family="DM Mono,monospace" letter-spacing="0.1em">LEGEND</text>
+
+  <!-- Leg 1 line -->
+  <line x1="28" y1="467" x2="52" y2="467" stroke="#34d058" stroke-width="2" stroke-dasharray="8 4"/>
+  <text x="60" y="470" font-size="9" fill="#7a93b8" font-family="DM Sans,sans-serif">Leg 1 — Long-haul (Farm → DC)</text>
+
+  <!-- Leg 2 green -->
+  <line x1="28" y1="483" x2="52" y2="483" stroke="#34d058" stroke-width="1.8" stroke-dasharray="5 3"/>
+  <text x="60" y="486" font-size="9" fill="#7a93b8" font-family="DM Sans,sans-serif">Tier 1 — Premium retail (RSL &gt; 4d)</text>
+
+  <!-- Leg 2 amber -->
+  <line x1="28" y1="499" x2="52" y2="499" stroke="#f5a623" stroke-width="1.8" stroke-dasharray="5 3"/>
+  <text x="60" y="502" font-size="9" fill="#7a93b8" font-family="DM Sans,sans-serif">Tier 2 — Discount channel (2–4d)</text>
+
+  <!-- Leg 2 coral -->
+  <line x1="28" y1="515" x2="52" y2="515" stroke="#ff6b6b" stroke-width="1.8" stroke-dasharray="5 3"/>
+  <text x="60" y="518" font-size="9" fill="#7a93b8" font-family="DM Sans,sans-serif">Tier 3 — Food bank (&lt; 2d)</text>
+
+  <!-- Scan dot -->
+  <circle cx="35" cy="531" r="4" fill="rgba(91,164,245,0.3)" stroke="#5ba4f5" stroke-width="1.2"/>
+  <circle cx="35" cy="531" r="1.8" fill="#5ba4f5"/>
+  <text x="60" y="534" font-size="9" fill="#7a93b8" font-family="DM Sans,sans-serif">Sensor scan / blockchain write</text>
+
+  <!-- ══ SCALE + COMPASS ══ -->
+  <line x1="300" y1="545" x2="400" y2="545" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  <line x1="300" y1="540" x2="300" y2="550" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  <line x1="400" y1="540" x2="400" y2="550" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  <text x="350" y="558" text-anchor="middle" font-size="8" fill="rgba(255,255,255,0.3)"
+    font-family="DM Sans,sans-serif">≈ 800 miles</text>
+
+  <!-- Compass -->
+  <g transform="translate(44,400)">
+    <circle r="13" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="0.8"/>
+    <polygon points="0,-10 -2.5,-4 2.5,-4" fill="rgba(91,164,245,0.8)"/>
+    <polygon points="0,10 -2.5,4 2.5,4" fill="rgba(255,255,255,0.2)"/>
+    <line x1="-10" y1="0" x2="10" y2="0" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+    <text y="-14" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.4)" font-family="DM Sans,sans-serif">N</text>
+  </g>
+
+  <!-- Data source -->
+  <text x="884" y="560" text-anchor="end" font-size="7.5" fill="rgba(255,255,255,0.18)"
+    font-family="DM Mono,monospace">AnyLogic PLE · 370 replications</text>
+
+  </svg>
+
+  </div><!-- map-card -->
+
+  <!-- ══════════════ RIGHT PANEL ══════════════ -->
+  <div class="right-panel">
+
+    <!-- ① THE HEARTBEAT CARD: NRV decision logic -->
+    <div class="sim-card" style="border-color:rgba(155,128,240,0.3);">
+      <div class="sim-card-title" style="color:var(--purple);">The DT Decision — Financial Hedge</div>
+
+      <!-- Framing sentence -->
+      <p style="font-size:10px;color:var(--muted);line-height:1.55;margin-bottom:10px;font-style:italic;">
+        Not "perfect vs. bad" — but<br><strong style="color:var(--text);font-style:normal;">sub-optimal vs. catastrophic.</strong>
+      </p>
+
+      <!-- SIDE A: Price Delta -->
+      <div style="background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.18);border-radius:8px;padding:9px 10px;margin-bottom:6px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,107,107,0.7);margin-bottom:5px;">Side A — Revenue loss if we reroute</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);line-height:1.8;">
+          Premium target &nbsp;&nbsp;<span style="color:var(--text);">$1,200</span><br>
+          − Salvage price &nbsp;&nbsp;&nbsp;<span style="color:var(--text);">$800</span>
+        </div>
+        <div style="border-top:1px solid rgba(255,107,107,0.15);margin-top:6px;padding-top:5px;display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="font-size:9px;color:var(--muted);">Controlled markdown</span>
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:#ff6b6b;font-weight:500;">$400</span>
+        </div>
+      </div>
+
+      <!-- VS divider -->
+      <div style="text-align:center;font-size:9px;color:var(--dim);letter-spacing:.1em;margin:2px 0;">vs.</div>
+
+      <!-- SIDE B: Total Cost of Waste -->
+      <div style="background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.18);border-radius:8px;padding:9px 10px;margin-bottom:8px;">
+        <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,166,35,0.7);margin-bottom:5px;">Side B — Cost if we blindly ship &amp; reject</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);line-height:1.8;">
+          Lost sale &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--text);">$1,200</span><br>
+          + Disposal fee &nbsp;&nbsp;&nbsp;<span style="color:var(--text);">$50</span>
+        </div>
+        <div style="border-top:1px solid rgba(245,166,35,0.15);margin-top:6px;padding-top:5px;display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="font-size:9px;color:var(--muted);">Catastrophic loss</span>
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:#f5a623;font-weight:500;">$1,250</span>
+        </div>
+      </div>
+
+      <!-- THE TRIGGER INEQUALITY -->
+      <div style="background:rgba(52,208,88,0.08);border:1px solid rgba(52,208,88,0.28);border-radius:8px;padding:10px 12px;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">
+          <span style="font-family:'DM Mono',monospace;font-size:18px;color:#ff6b6b;font-weight:500;">$400</span>
+          <span style="font-size:16px;color:var(--green);font-weight:600;">&lt;</span>
+          <span style="font-family:'DM Mono',monospace;font-size:18px;color:#f5a623;font-weight:500;">$1,250</span>
+        </div>
+        <div style="text-align:center;font-size:9px;color:rgba(52,208,88,0.9);font-weight:500;letter-spacing:.04em;">
+          REROUTE APPROVED — saves $850 net swing
+        </div>
+        <div style="text-align:center;font-size:8px;color:var(--muted);margin-top:3px;">
+          RSL 1.9 days · pallet diverted to Discount Store
+        </div>
+      </div>
+    </div>
+
+    <!-- ② OUTCOME: pallet distribution as consequence of the logic above -->
+    <div class="chart-card">
+      <div class="sim-card-title">Result — 370-Run Distribution</div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.4;">
+        Each pallet ran through the same inequality.<br>The bars show where they landed.
+      </div>
+      <div class="bars">
+        <div class="bar-col">
+          <div class="bar-num green">66</div>
+          <div class="bar" style="height:28px;background:rgba(52,208,88,0.72);"></div>
+          <div class="bar-lbl">Premium<br>RSL &gt; 4d</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-num amber">168</div>
+          <div class="bar" style="height:72px;background:rgba(245,166,35,0.72);"></div>
+          <div class="bar-lbl">Discount<br>2–4d</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-num coral">98</div>
+          <div class="bar" style="height:42px;background:rgba(255,107,107,0.72);"></div>
+          <div class="bar-lbl">Food bank<br>&lt; 2d</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ NET OUTCOME — the payoff of running the inequality 370 times -->
+    <div class="profit-hero">
+      <div class="profit-label">Cumulative Net Profit · 370 runs</div>
+      <div class="profit-val">$111,843</div>
+      <div class="profit-sub" style="margin-bottom:8px;">Every reroute decision compounded.</div>
+      <div class="cost-row">
+        <div class="cost-item">
+          <div class="cv green">$112,763</div>
+          <div class="cl">Revenue recovered</div>
+        </div>
+        <div class="cost-item">
+          <div class="cv coral">− $920</div>
+          <div class="cl">PEGS sensor cost</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- right-panel -->
+
+</div><!-- main -->
+
+</body>
+</html>
